@@ -1,197 +1,222 @@
 import React, { useState } from 'react';
-import {
-    Text,
-    View,
-    Image,
-    TouchableOpacity,
-    ScrollView,
-    TextInput,
-    Modal,
-    FlatList,
-} from 'react-native';
-import { launchImageLibrary } from 'react-native-image-picker';
+import { View, Text, TextInput, TouchableOpacity, Image, Alert, ScrollView } from 'react-native';
+import * as ImagePicker from "expo-image-picker";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import CreateEventStyles from '../styles/CreateEventStyles';
+import api from '../apiService';
 
 function CreateEventScreen({ navigation }) {
-    const [title, setTitle] = useState('');
-    const [date, setDate] = useState(null);
+    const [name, setName] = useState('');
+    const [date, setDate] = useState('');
     const [showDatePicker, setShowDatePicker] = useState(false);
-    const [time, setTime] = useState(null);
+    const [time, setTime] = useState('');
     const [showTimePicker, setShowTimePicker] = useState(false);
-    const [description, setDescription] = useState('');
     const [location, setLocation] = useState('');
+    const [description, setDescription] = useState('');
     const [eventImage, setEventImage] = useState(null);
-    const [modalVisible, setModalVisible] = useState(false);
-    const [errors, setErrors] = useState({}); // Error handling state
+    const [errors, setErrors] = useState({});
+    const [imageAspectRatio, setImageAspectRatio] = useState(4 / 3); // Default aspect ratio
 
-    const locations = ['Location 1', 'Location 2', 'Location 3'];
 
-    const handleImageUpload = async () => {
-        const response = await launchImageLibrary({
-            mediaType: 'photo',
-            quality: 0.5,
-        });
-
-        if (response && response.didCancel) {
-            console.log('User cancelled image picker');
-        } else if (response && response.errorMessage) {
-            console.log('Error: ', response.errorMessage);
-        } else if (response && response.assets && response.assets.length > 0) {
-            setEventImage(response.assets[0].uri);
-        }
-    };
-
-    const handleCreateEvent = () => {
+    const validateFields = () => {
         const newErrors = {};
-        if (!title) newErrors.title = 'Title is required.';
+        if (!name) newErrors.name = 'Name is required.';
         if (!date) newErrors.date = 'Date is required.';
         if (!time) newErrors.time = 'Time is required.';
+        if (!location) newErrors.location = 'Location is required.';
+        if (!description) newErrors.description = 'Description is required.';
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
-        if (Object.keys(newErrors).length > 0) {
-            setErrors(newErrors);
+    const handleImageUpload = async () => {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+            Alert.alert('Permission denied', 'You need to grant permission to access the media library.');
             return;
         }
 
-        alert(
-            `Event Created!\nTitle: ${title}\nDate: ${date?.toDateString()} ${time?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}\nLocation: ${location}\nDescription: ${description}`
-        );
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images, // Correct option
+            allowsEditing: true,
+            aspect: [4, 3], // Recommended aspect
+            quality: 1,
+        });
+
+        if (!result.canceled) {
+            setEventImage(result.assets[0].uri);
+            // Dynamically set aspect ratio if provided
+            if (result.assets[0].width && result.assets[0].height) {
+                const aspectRatio = result.assets[0].width / result.assets[0].height;
+                setImageAspectRatio(aspectRatio); // You'll need a state `imageAspectRatio`
+            }
+        }
     };
+
+    const fetchEventDetails = async (eventId) => {
+        try {
+            console.log("Fetching event details for ID:", eventId);
+            const response = await api.get(`/events/${eventId}`); // Adjust the endpoint as per your backend
+            console.log("Event details fetched:", response.data);
+        } catch (error) {
+            console.error("Error fetching event details:", error.response ? error.response.data : error.message);
+        }
+    };
+
+// Test this function
+    fetchEventDetails(1).then(r => {}); // Replace 1 with a valid event_Id
+
+    const handleCreateEvent = async () => {
+        if (!validateFields()) return;
+
+        try {
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('date', date);
+            formData.append('time', time);
+            formData.append('location', location);
+            formData.append('description', description);
+            if (eventImage) {
+                const filename = eventImage.split('/').pop();
+                const mimeType = filename.match(/\.\w+$/) ? `image/${filename.split('.').pop()}` : 'image/jpeg';
+                formData.append('image', { uri: eventImage, name: filename, type: mimeType });
+            }
+
+            await api.post('/events', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+            alert('Event created successfully!');
+            navigation.goBack();
+        } catch (error) {
+            console.error('Error creating event:', error);
+            alert('Failed to create event. Please try again.');
+        }
+    };
+
 
     const handleDateChange = (event, selectedDate) => {
         setShowDatePicker(false);
         if (selectedDate) {
-            setDate(selectedDate);
+            const formattedDate = selectedDate.toISOString().split('T')[0];
+            setDate(formattedDate);
         }
     };
 
     const handleTimeChange = (event, selectedTime) => {
         setShowTimePicker(false);
         if (selectedTime) {
-            setTime(selectedTime);
+            const formattedTime = selectedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            setTime(formattedTime);
         }
     };
 
     return (
-        <ScrollView contentContainerStyle={CreateEventStyles.container}>
-            {/* Image Upload */}
-            <TouchableOpacity style={CreateEventStyles.imageUpload} onPress={handleImageUpload}>
-                {eventImage ? (
-                    <Image source={{ uri: eventImage }} style={CreateEventStyles.imagePreview} />
-                ) : (
-                    <Text style={CreateEventStyles.imageText}>Upload Event Picture</Text>
-                )}
-            </TouchableOpacity>
+        <ScrollView
+            style={CreateEventStyles.container}
+            contentContainerStyle={{ paddingBottom: 100 }}
+            keyboardShouldPersistTaps="handled"
+        >
+            <Text style={CreateEventStyles.formTitle}>Create Event</Text>
 
-            {/* Title */}
-            <Text style={CreateEventStyles.label}>
-                Event Title <Text style={CreateEventStyles.required}>*</Text>
-            </Text>
+            <Text style={CreateEventStyles.label}>Event Name:</Text>
             <TextInput
                 style={[
-                    CreateEventStyles.input,
-                    errors.title ? { borderColor: 'red' } : undefined,
+                    CreateEventStyles.inputField,
+                    errors.name && { borderColor: 'red' },
                 ]}
-                placeholder="Event Title"
-                value={title}
-                onChangeText={setTitle}
+                value={name}
+                onChangeText={setName}
+                placeholder="Enter event name"
             />
-            {errors.title && <Text style={{ color: 'red' }}>{errors.title}</Text>}
+            {errors.name && <Text style={CreateEventStyles.errorText}>{errors.name}</Text>}
 
-            {/* Location */}
-            <Text style={CreateEventStyles.label}>
-                Location <Text style={CreateEventStyles.required}>*</Text>
-            </Text>
+            <Text style={CreateEventStyles.label}>Location:</Text>
+            <TextInput
+                style={[
+                    CreateEventStyles.inputField,
+                    errors.location && { borderColor: 'red' },
+                ]}
+                value={location}
+                onChangeText={setLocation}
+                placeholder="Enter event location"
+            />
+            {errors.location && <Text style={CreateEventStyles.errorText}>{errors.location}</Text>}
+
+            <Text style={CreateEventStyles.label}>Date:</Text>
             <TouchableOpacity
-                style={[CreateEventStyles.input, errors.location ? { borderColor: 'red' } : undefined]}
-                onPress={() => setModalVisible(true)}
-            >
-                <Text>{location || 'Select Location'}</Text>
-            </TouchableOpacity>
-
-            <Modal animationType="slide" transparent={true} visible={modalVisible}>
-                <View style={CreateEventStyles.modalContainer}>
-                    <View style={CreateEventStyles.modalContent}>
-                        <FlatList
-                            data={locations}
-                            renderItem={({ item }) => (
-                                <TouchableOpacity
-                                    style={CreateEventStyles.modalItem}
-                                    onPress={() => {
-                                        setLocation(item);
-                                        setModalVisible(false);
-                                    }}
-                                >
-                                    <Text style={CreateEventStyles.modalText}>{item}</Text>
-                                </TouchableOpacity>
-                            )}
-                            keyExtractor={(item) => item}
-                        />
-                        <TouchableOpacity
-                            style={CreateEventStyles.modalCloseButton}
-                            onPress={() => setModalVisible(false)}
-                        >
-                            <Text style={CreateEventStyles.modalCloseText}>Close</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </Modal>
-
-            {/* Date */}
-            <Text style={CreateEventStyles.label}>
-                Date <Text style={CreateEventStyles.required}>*</Text>
-            </Text>
-            <TouchableOpacity
-                style={[CreateEventStyles.input, errors.date ? { borderColor: 'red' } : undefined]}
+                style={CreateEventStyles.inputField}
                 onPress={() => setShowDatePicker(true)}
             >
-                <Text>{date ? date.toDateString() : 'Select Date'}</Text>
+                <Text>{date || "Select date"}</Text>
             </TouchableOpacity>
             {showDatePicker && (
-                <DateTimePicker value={new Date()} mode="date" onChange={handleDateChange} />
+                <DateTimePicker
+                    value={new Date()}
+                    mode="date"
+                    display="default"
+                    onChange={handleDateChange}
+                />
             )}
+            {errors.date && <Text style={CreateEventStyles.errorText}>{errors.date}</Text>}
 
-            {/* Time */}
-            <Text style={CreateEventStyles.label}>
-                Time <Text style={CreateEventStyles.required}>*</Text>
-            </Text>
+            <Text style={CreateEventStyles.label}>Time:</Text>
             <TouchableOpacity
-                style={[CreateEventStyles.input, errors.time ? { borderColor: 'red' } : undefined]}
+                style={CreateEventStyles.inputField}
                 onPress={() => setShowTimePicker(true)}
             >
-                <Text>
-                    {time ? time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Select Time'}
-                </Text>
+                <Text>{time || "Select time"}</Text>
             </TouchableOpacity>
             {showTimePicker && (
-                <DateTimePicker value={new Date()} mode="time" onChange={handleTimeChange} />
+                <DateTimePicker
+                    value={new Date()}
+                    mode="time"
+                    display="default"
+                    onChange={handleTimeChange}
+                />
             )}
+            {errors.time && <Text style={CreateEventStyles.errorText}>{errors.time}</Text>}
 
-            {/* Description */}
-            <Text style={CreateEventStyles.label}>
-                Description <Text style={CreateEventStyles.required}>*</Text>
-            </Text>
+            <Text style={CreateEventStyles.label}>Description:</Text>
             <TextInput
-                style={CreateEventStyles.textArea}
-                placeholder="Event Description"
+                style={[
+                    CreateEventStyles.textAreaField,
+                    errors.description && { borderColor: 'red' },
+                ]}
                 value={description}
                 onChangeText={setDescription}
-                maxLength={200}
+                placeholder="Enter event description"
                 multiline
             />
+            {errors.description && <Text style={CreateEventStyles.errorText}>{errors.description}</Text>}
 
-            {/* Buttons */}
-            <View style={CreateEventStyles.buttonContainer}>
-                <TouchableOpacity style={CreateEventStyles.createEventButton} onPress={handleCreateEvent}>
-                    <Text style={CreateEventStyles.createEventButtonText}>Add Event</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={[CreateEventStyles.createEventButton, CreateEventStyles.cancelButton]}
-                    onPress={() => navigation.goBack()}
-                >
-                    <Text style={CreateEventStyles.createEventButtonText}>Cancel</Text>
-                </TouchableOpacity>
-            </View>
+            <Text style={CreateEventStyles.label}>Event Image:</Text>
+            {eventImage ? (
+                <Image
+                    source={{ uri: eventImage }}
+                    style={[
+                        CreateEventStyles.imagePreview,
+                        imageAspectRatio && { aspectRatio: imageAspectRatio }, // Apply dynamic aspect ratio
+                    ]}
+                />
+
+            ) : (
+                <View style={CreateEventStyles.imageUploadContainer}>
+                    <Text style={CreateEventStyles.imagePlaceholder}>No image selected</Text>
+                </View>
+            )}
+            <TouchableOpacity
+                style={CreateEventStyles.primaryButton}
+                onPress={handleImageUpload}
+            >
+                <Text style={CreateEventStyles.primaryButtonText}>Pick an Image</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+                style={CreateEventStyles.primaryButton}
+                onPress={handleCreateEvent}
+            >
+                <Text style={CreateEventStyles.primaryButtonText}>Create Event</Text>
+            </TouchableOpacity>
         </ScrollView>
     );
 }

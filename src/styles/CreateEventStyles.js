@@ -1,126 +1,110 @@
 import { StyleSheet } from 'react-native';
 
-
 const CreateEventStyles = StyleSheet.create({
     container: {
-        flexGrow: 1,
-        padding: 20,
+        flex: 1,
         backgroundColor: '#FFFFFF',
+        padding: 20,
+        paddingBottom: 100,
+    },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        height: '10%',
+        backgroundColor: '#00A54F',
+        width: '100%',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 10,
+        paddingHorizontal: 20,
+        justifyContent: 'center',
+    },
+    formTitle: {
+        fontSize: 30,
+        fontWeight: 'bold',
+        color: '#00A54F',
+        textAlign: 'center',
+        marginTop: '0%',
+        marginBottom: 20,
     },
     label: {
         fontSize: 16,
         fontWeight: 'bold',
+        color: '#00A54F',
         marginBottom: 5,
     },
-    required: {
-        color: 'red',
-    },
-    input: {
+    inputField: {
         height: 50,
         borderColor: '#ccc',
         borderWidth: 1,
-        borderRadius: 5,
+        borderRadius: 10,
         marginBottom: 15,
         paddingHorizontal: 10,
         fontSize: 16,
+        backgroundColor: '#F9F9F9',
     },
-    textArea: {
+    textAreaField: {
         height: 100,
-        borderColor: 'gray',
+        borderColor: '#ccc',
         borderWidth: 1,
+        borderRadius: 10,
         padding: 10,
         fontSize: 16,
         textAlignVertical: 'top',
-        borderRadius: 5,
+        backgroundColor: '#F9F9F9',
+        marginBottom: 15,
+    },
+    errorText: {
+        color: 'red',
+        fontSize: 12,
         marginBottom: 10,
     },
-    errorInput: {
-        borderColor: 'red',
-    },
-    imageUpload: {
+    imageUploadContainer: {
         height: 200,
         borderColor: '#ccc',
         borderWidth: 1,
-        borderRadius: 5,
+        borderRadius: 10,
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: 15,
+        backgroundColor: '#F9F9F9',
     },
     imagePreview: {
         width: '100%',
-        height: '100%',
+        height: undefined,
+        aspectRatio: 4 / 4,
         borderRadius: 5,
     },
-    imageText: {
+    imagePlaceholder: {
+        fontSize: 16,
         color: '#888',
     },
-    buttonContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
+    primaryButton: {
+        backgroundColor: '#00A54F',
+        paddingVertical: 15,
+        borderRadius: 10,
+        alignItems: 'center',
         marginTop: 20,
     },
-    createEventButton: {
-        backgroundColor: '#4CAF50',
-        paddingVertical: 12,
-        paddingHorizontal: 30,
-        borderRadius: 5,
-    },
-    createEventButtonText: {
-        color: 'white',
+    primaryButtonText: {
         fontSize: 16,
+        color: '#FFFFFF',
+        fontWeight: 'bold',
     },
-    cancelButton: {
+    secondaryButton: {
         backgroundColor: '#FF5733',
-    },
-    modalContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    },
-    modalContent: {
-        backgroundColor: 'white',
-        width: '80%',
+        paddingVertical: 15,
         borderRadius: 10,
-        padding: 20,
-    },
-    modalItem: {
-        padding: 15,
-        borderBottomWidth: 1,
-        borderBottomColor: '#ccc',
-    },
-    modalText: {
-        fontSize: 16,
-        color: '#333',
-    },
-    modalCloseButton: {
-        marginTop: 15,
-        padding: 10,
-        backgroundColor: '#FF5733',
-        borderRadius: 5,
         alignItems: 'center',
+        marginTop: 10,
     },
-    modalCloseText: {
-        color: 'white',
+    secondaryButtonText: {
         fontSize: 16,
-    },
-    dateInput: {
-        textAlign: 'center',
-    },
-    timeInput: {
-        textAlign: 'center',
-    },
-    inputStyle : {
-        textAlign: 'left',
-        alignSelf: 'center',
-        paddingTop: 10,
-        paddingBottom: 10,
-    },
-    charCount: {
-        fontSize: 12,
-        color: 'gray',
-        textAlign: 'right',
-        marginBottom: 5,
+        color: '#FFFFFF',
+        fontWeight: 'bold',
     },
 });
+
 export default CreateEventStyles;

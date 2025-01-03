@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Text, View, Image, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 import LoginStyles from '../styles/LoginStyles';
+import api from '../apiService';
+
 //import AddReviewScreen from "./AddReviewScreen";
 //import universityLogo from "/university-logo.png";
 
@@ -11,14 +13,27 @@ function LoginScreen({ navigation }) {
   const [password, setPassword] = useState('');
   console.log("LoginScreen is rendering");
 
-  const handleLogin = () => {
+
+
+  const handleLogin = async () => {
     if (username && password) {
-      alert(`Username: ${username}\nPassword: ${password}`);
-      navigation.navigate('Facilities');
+      try {
+        const response = await api.post('/students/login', {
+          student_id: username,
+          password,
+        });
+        if (response.data) {
+          alert('Login successful!');
+          navigation.navigate('Facilities');
+        }
+      } catch (error) {
+        alert(error.response?.data?.message || 'Login failed.');
+      }
     } else {
       alert('Please enter both username and password.');
     }
   };
+
 
   return (
       <ScrollView contentContainerStyle={LoginStyles.scrollContainer}>
