@@ -41,7 +41,7 @@ const HomeStyles = StyleSheet.create({
     },
     CategoryTitle: {
         fontSize: 20,
-        color: '#054A12',
+        color: '#00A54F',
         marginBottom: 10,
     },
     eventItem: {

@@ -1,69 +1,99 @@
-import React, { useState } from 'react';
-import {Text, View, TouchableOpacity, ScrollView } from 'react-native';
-
+import React, { useContext, useState } from 'react';
+import { Text, View, TouchableOpacity, FlatList } from 'react-native';
 import FavoritesStyles from '../styles/FavoritesStyles';
-import Ionicons from "@expo/vector-icons/Ionicons";
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { FavoritesContext } from '../contexts/FavoritesContext';
+import { useNavigation } from '@react-navigation/native';
+import api from '../apiService';
+
 function FavoritesScreen() {
-  const [SelectedCategory, SetSelectedCategory] = useState('upcoming');
-  const upcomingEvents = [
-    {
-      id: '1',
-      title: 'Nursing Skills Workshop',
-    },
-  ];
+    const { interestedEvents, toggleInterestedEvent } = useContext(FavoritesContext);
+    const [selectedCategory, setSelectedCategory] = useState('upcoming');
+    const navigation = useNavigation();
 
-  const pastEvents = [
-    {
-      id: '2',
-      title: 'Business Innovation Seminar',
-    },
-  ];
+    const currentDate = new Date();
+    const upcomingEvents = interestedEvents.filter(
+        (event) => new Date(event.date) >= currentDate
+    );
+    const pastEvents = interestedEvents.filter(
+        (event) => new Date(event.date) < currentDate
+    );
 
-  return (
-      <ScrollView contentContainerStyle={FavoritesStyles.container}>
-
-        {/* Toggle buttons */}
-        <View style={FavoritesStyles.bottomTitle}>
-          <TouchableOpacity
-              style={[
-                  FavoritesStyles.CategoryButton,
-                  SelectedCategory === 'upcoming' && FavoritesStyles.SelectedButton,
-              ]}
-              onPress={() => SetSelectedCategory('upcoming')}
-          >
-            <Text style={FavoritesStyles.buttonText}>Upcoming Events</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-              style={[
-                  FavoritesStyles.CategoryButton,
-                  SelectedCategory === 'past' && FavoritesStyles.SelectedButton,
-              ]}
-              onPress={() => SetSelectedCategory('past')}
-          >
-            <Text style={FavoritesStyles.buttonText}>Past Events</Text>
-          </TouchableOpacity>
+    const renderEventItem = ({ item }) => (
+        <View style={FavoritesStyles.eventItem}>
+            <View style={FavoritesStyles.eventDetails}>
+                <Text style={FavoritesStyles.eventTitle}>{item.name}</Text>
+                <Text style={FavoritesStyles.eventDate}>
+                    <Ionicons name="calendar-outline" size={14} color="#00A54F" />{' '}
+                    {item.date}
+                </Text>
+                <Text style={FavoritesStyles.eventLocation}>
+                    <Ionicons name="location-outline" size={14} color="#00A54F" />{' '}
+                    {item.location}
+                </Text>
+                <Text style={FavoritesStyles.eventDescription}>
+                    {item.description.length > 50
+                        ? item.description.substring(0, 50) + '...'
+                        : item.description}
+                </Text>
+            </View>
+            <View style={FavoritesStyles.eventActions}>
+                <TouchableOpacity
+                    style={FavoritesStyles.detailsButton}
+                    onPress={() => navigation.navigate('EventDetails', { eventId: item.id })}
+                >
+                    <Text style={FavoritesStyles.detailsButtonText}>View Details</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={FavoritesStyles.removeButton}
+                    onPress={() => toggleInterestedEvent(item)}
+                >
+                    <Ionicons name="trash-outline" size={20} color="#fff" />
+                </TouchableOpacity>
+            </View>
         </View>
+    );
 
-        {/* Events list */}
-        <View style={FavoritesStyles.eventCategory}>
-          {SelectedCategory === 'upcoming' &&
-              upcomingEvents.map((event) => (
-                  <View key={event.id} style={FavoritesStyles.eventItem}>
-                    <Text style={FavoritesStyles.eventTitle}>{event.title}</Text>
-                    <Ionicons name="chevron-forward" size={24} color="#00A54F" />
-                  </View>
-              ))}
+    return (
+        <View style={FavoritesStyles.container}>
+            {/* Category Tabs */}
+            <View style={FavoritesStyles.bottomTitle}>
+                <TouchableOpacity
+                    style={[
+                        FavoritesStyles.CategoryButton,
+                        selectedCategory === 'upcoming' &&
+                        FavoritesStyles.SelectedButton,
+                    ]}
+                    onPress={() => setSelectedCategory('upcoming')}
+                >
+                    <Text style={FavoritesStyles.buttonText}>Upcoming Events</Text>
+                </TouchableOpacity>
 
-          {SelectedCategory === 'past' &&
-              pastEvents.map((event) => (
-                  <View key={event.id} style={FavoritesStyles.eventItem}>
-                    <Text style={FavoritesStyles.eventTitle}>{event.title}</Text>
-                    <Ionicons name="chevron-forward" size={24} color="#00A54F" />
-                  </View>
-              ))}
+                <TouchableOpacity
+                    style={[
+                        FavoritesStyles.CategoryButton,
+                        selectedCategory === 'past' && FavoritesStyles.SelectedButton,
+                    ]}
+                    onPress={() => setSelectedCategory('past')}
+                >
+                    <Text style={FavoritesStyles.buttonText}>Past Events</Text>
+                </TouchableOpacity>
+            </View>
+
+            {/* Event List */}
+            <FlatList
+                data={selectedCategory === 'upcoming' ? upcomingEvents : pastEvents}
+                renderItem={renderEventItem}
+                keyExtractor={(item) => item.id.toString()}
+                contentContainerStyle={FavoritesStyles.eventCategory}
+                ListEmptyComponent={
+                    <Text style={FavoritesStyles.emptyText}>
+                        No {selectedCategory === 'upcoming' ? 'Upcoming' : 'Past'} Events
+                    </Text>
+                }
+            />
         </View>
-      </ScrollView>
-  );
+    );
 }
+
 export default FavoritesScreen;

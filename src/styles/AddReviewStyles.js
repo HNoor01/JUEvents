@@ -4,7 +4,7 @@ import { StyleSheet } from 'react-native';
 const AddReviewStyles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: '#F8F9FA',
         padding: 20,
     },
     title: {

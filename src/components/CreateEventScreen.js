@@ -86,7 +86,7 @@ function CreateEventScreen({ navigation }) {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
             alert('Event created successfully!');
-            navigation.goBack();
+            navigation.navigate('Home');
         } catch (error) {
             console.error('Error creating event:', error);
             alert('Failed to create event. Please try again.');
@@ -105,10 +105,11 @@ function CreateEventScreen({ navigation }) {
     const handleTimeChange = (event, selectedTime) => {
         setShowTimePicker(false);
         if (selectedTime) {
-            const formattedTime = selectedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const formattedTime = selectedTime.toTimeString().split(' ')[0]; // Outputs in HH:MM:SS format
             setTime(formattedTime);
         }
     };
+
 
     return (
         <ScrollView

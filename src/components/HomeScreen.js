@@ -4,6 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import HomeStyles from '../styles/HomeStyles';
 import api from '../apiService';
+import { useFocusEffect } from '@react-navigation/native';
 
 function HomeScreen() {
     const navigation = useNavigation();
@@ -13,7 +14,7 @@ function HomeScreen() {
     useEffect(() => {
         const fetchEvents = async () => {
             try {
-                const response = await api.get('/events');
+                const response = await api.get('/api/events');
                 setEvents(response.data);
             } catch (error) {
                 console.error('Error fetching events:', error);
@@ -22,7 +23,19 @@ function HomeScreen() {
 
         fetchEvents(); // Call the async function inside useEffect
     }, []);
-
+    useFocusEffect(
+        React.useCallback(() => {
+            const fetchEvents = async () => {
+                try {
+                    const response = await api.get('/events');
+                    setEvents(response.data);
+                } catch (error) {
+                    console.error('Error fetching events:', error);
+                }
+            };
+            fetchEvents();
+        }, [])
+    );
     return (
         <ScrollView contentContainerStyle={HomeStyles.container}>
             {/* Header */}

@@ -79,7 +79,7 @@ const EventDetailsStyles = StyleSheet.create({
         textAlign: 'center',
     },
     submitButton: {
-        backgroundColor: '#054A12',
+        backgroundColor: '#00A54F',
         padding: 15,
         borderRadius: 5,
         alignItems: 'center',
@@ -109,16 +109,19 @@ const EventDetailsStyles = StyleSheet.create({
         color: '#00A54F', // Added from App.js
     },
     addReviewButton: {
-        backgroundColor: '#00A54F',
-        padding: 15,
-        borderRadius: 5,
+        flexDirection: 'row',
         alignItems: 'center',
-        marginTop: 20,
+        justifyContent: 'center',
+        backgroundColor: '#00A54F',
+        padding: 12,
+        borderRadius: 8,
+        marginTop: 15,
     },
     addReviewButtonText: {
-        color: '#fff',
-        fontWeight: 'bold',
+        color: '#FFFFFF',
         fontSize: 16,
+        fontWeight: 'bold',
+        marginLeft: 8,
     },
     interestedButton: { // Added from App.js
         flexDirection: 'row',
@@ -134,6 +137,25 @@ const EventDetailsStyles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
         marginLeft: 10,
+    },
+    shareButton: {
+        backgroundColor: '#00A54F', // Green color
+        padding: 10,
+        borderRadius: 9,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: 10,
+        width: '89%', // Make it consistent with other buttons
+        marginHorizontal: 20, // Consistent margins on the left and right
+
+
+    },
+    shareButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginLeft: 5,
     },
 });
 

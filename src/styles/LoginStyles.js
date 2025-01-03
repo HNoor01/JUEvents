@@ -10,7 +10,7 @@ const LoginStyles = StyleSheet.create({
     header: {
         justifyContent: 'center',
         alignItems: 'center',
-        marginTop: 90,
+        marginTop: -80,
         marginBottom: 20,
     },
     HeaderImage: {
@@ -35,7 +35,7 @@ const LoginStyles = StyleSheet.create({
     formText: {
         fontSize: 20,
         color: "#FFFFFF",
-        marginVertical: 5,
+        marginVertical: 1,
     },
     input: {
         height: 40,
@@ -54,7 +54,7 @@ const LoginStyles = StyleSheet.create({
         alignItems: 'center',
     },
     buttonText: {
-        color: '#054A12',
+        color: '#00A54F',
         fontSize: 18,
     },
     ForgotPassword: {

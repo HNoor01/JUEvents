@@ -1,10 +1,14 @@
 import React from 'react';
-import { registerRootComponent } from 'expo';
+import { NavigationContainer } from '@react-navigation/native';
+import { FavoritesProvider } from './src/contexts/FavoritesContext';
 import Navigation from './src/Navigation'; // Adjust path as needed
 
 export default function App() {
-    return <Navigation />;
+    return (
+        <FavoritesProvider>
+            <NavigationContainer>
+                <Navigation />
+            </NavigationContainer>
+        </FavoritesProvider>
+    );
 }
-
-// Register the app with Expo
-registerRootComponent(App);

@@ -28,7 +28,7 @@ const FacilitiesStyles = StyleSheet.create({
         backgroundColor: '#aeb7b1',
     },
     facilityText: {
-        color: '#054A12',
+        color: '#00A54F',
         fontSize: 15,
         textAlign: 'center',
     },
@@ -40,7 +40,7 @@ const FacilitiesStyles = StyleSheet.create({
         alignItems: 'center',
     },
     buttonText: {
-        color: '#054A12',
+        color: '#00A54F',
         fontSize: 18,
     },
 });

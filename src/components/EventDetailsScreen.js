@@ -1,50 +1,116 @@
-import React, { useState } from 'react';
-import {
-    Text,
-    View,
-    Image,
-    TouchableOpacity,
-    TextInput,
-    FlatList
-} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {Text, View, Image, TouchableOpacity, TextInput, FlatList, ActivityIndicator, Share} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import Ionicons from '@expo/vector-icons/Ionicons'; // Ensure Ionicons is imported
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { useContext } from 'react';
 import EventDetailsStyles from '../styles/EventDetailsStyles';
+import api from '../apiService'; // Ensure your API service is properly imported
+import { FavoritesContext } from '../contexts/FavoritesContext';
+
 
 function EventDetailsScreen({ route }) {
-    // Destructure eventId from route.params if available
-    const { eventId } = route.params || {};
-
-    const navigation = useNavigation();
-
-    const [selectedTab, setSelectedTab] = useState('Details');
+    const { eventId, eventTitle } = route.params; // Get eventId and eventTitle from route params
+    const [eventDetails, setEventDetails] = useState(null); // State for event details
+    const [loading, setLoading] = useState(true); // State for loading indicator
+    const [selectedTab, setSelectedTab] = useState('Details'); // Tab state
     const [attendanceCode, setAttendanceCode] = useState('');
     const [isAttended, setIsAttended] = useState(false);
     const [interested, setInterested] = useState(false);
+    const { toggleInterestedEvent } = useContext(FavoritesContext); // Access context
 
-    const [reviews, setReviews] = useState([
-        { id: 1, name: 'Talal Najada', rating: 5, text: 'Great workshop!' },
-        { id: 2, name: 'Hashem Noor', rating: 4, text: 'Very informative and engaging, but busy.' },
-    ]);
+    const handleInterestedToggle = () => {
+        toggleInterestedEvent(eventDetails); // Pass the event details to the context
+        setInterested(!interested); // Update the local state for UI toggle
+    };
 
-    const handleAttendanceSubmit = () => {
-        if (attendanceCode === '1234') {
-            setIsAttended(true);
-        } else {
-            alert('Attendance Code is wrong!');
+    const [reviews, setReviews] = useState([]);
+
+
+    const navigation = useNavigation();
+
+    // Function to fetch reviews in EventDetailsScreen.js
+    useEffect(() => {
+        const fetchReviews = async () => {
+            try {
+                const response = await api.get(`/api/reviews/${eventId}/reviews`);
+                setReviews(response.data); // Ensure response.data contains the reviews array
+            } catch (error) {
+                console.error('Error fetching reviews:', error.response?.data || error);
+            }
+        };
+
+        const fetchEventDetails = async () => {
+            try {
+                const response = await api.get(`/events/${eventId}`);
+                setEventDetails(response.data);
+                setLoading(false);
+            } catch (error) {
+                console.error('Error fetching event details:', error);
+                setLoading(false);
+            }
+        };
+
+        fetchEventDetails();
+        fetchReviews();
+    }, [eventId]);
+
+
+    const handleAttendanceSubmit = async () => {
+        try {
+            const response = await api.post(`/events/${eventId}/validate-attendance`, {
+                attendanceCode,
+            });
+            setIsAttended(true); // Mark the user as attended
+            alert(response.data.message); // Show confirmation message
+        } catch (error) {
+            console.error('Error validating attendance code:', error.response?.data || error);
+            alert(error.response?.data?.error || 'Invalid attendance code. Please try again.');
         }
     };
 
-    const handleInterestedToggle = () => setInterested(!interested);
+
+
+
+    if (loading) {
+        return (
+            <View style={EventDetailsStyles.container}>
+                <ActivityIndicator size="large" color="#00A54F" />
+                <Text style={{ marginTop: 10 }}>Loading event details...</Text>
+            </View>
+        );
+    }
+
+    if (!eventDetails) {
+        return (
+            <View style={EventDetailsStyles.container}>
+                <Text style={{ color: 'red', fontSize: 18 }}>Event details not found.</Text>
+            </View>
+        );
+    }
+    const handleShare = async () => {
+        try {
+            const result = await Share.share({
+                message: `Check out this event: ${eventDetails.name}\nLocation: ${eventDetails.location}\nDate: ${eventDetails.date}\nTime: ${eventDetails.time}\n\nJoin us at this amazing event!`,
+            });
+
+            if (result.action === Share.sharedAction) {
+                console.log('Event shared successfully!');
+            } else if (result.action === Share.dismissedAction) {
+                console.log('Event sharing dismissed.');
+            }
+        } catch (error) {
+            console.error('Error sharing event:', error);
+        }
+    };
 
     return (
         <View style={EventDetailsStyles.container}>
             {/* Event Image */}
             <Image
-                source={{ uri: 'https://via.placeholder.com/400x200' }}
+                source={{ uri: eventDetails.image || 'https://via.placeholder.com/400x200' }}
                 style={EventDetailsStyles.image}
             />
-            <Text style={EventDetailsStyles.header}>Nursing Skills Workshop</Text>
+            <Text style={EventDetailsStyles.header}>{eventDetails.name}</Text>
 
             {/* Tabs */}
             <View style={EventDetailsStyles.tabContainer}>
@@ -64,93 +130,116 @@ function EventDetailsScreen({ route }) {
             </View>
 
             {/* Tab Content */}
-            {selectedTab === 'Details' && (
-                <View style={EventDetailsStyles.detailsContainer}>
-                    <View style={EventDetailsStyles.row}>
-                        <Ionicons name="calendar-outline" size={20} color="#00a54f" />
-                        <Text style={EventDetailsStyles.detailText}>Nov 25, 2024</Text>
-                    </View>
-                    <View style={EventDetailsStyles.row}>
-                        <Ionicons name="location-outline" size={20} color="#00a54f" />
-                        <Text style={EventDetailsStyles.detailText}>Faculty Of Nursing</Text>
-                    </View>
-                    <View style={EventDetailsStyles.row}>
-                        <Ionicons name="person-outline" size={20} color="#00a54f" />
-                        <Text style={EventDetailsStyles.detailText}>Posted by: Raya Yahya</Text>
-                    </View>
-                    <View style={EventDetailsStyles.row}>
-                        <Ionicons name="star-outline" size={20} color="#00a54f" />
-                        <Text style={EventDetailsStyles.detailText}>
-                            17 people are interested
+            <View style={EventDetailsStyles.tabContent}>
+                {selectedTab === 'Details' && (
+                    <View style={EventDetailsStyles.detailsContainer}>
+                        <View style={EventDetailsStyles.row}>
+                            <Ionicons name="calendar-outline" size={20} color="#00A54F" />
+                            <Text style={EventDetailsStyles.detailText}>{eventDetails.date}</Text>
+                        </View>
+                        <View style={EventDetailsStyles.row}>
+                            <Ionicons name="location-outline" size={20} color="#00A54F" />
+                            <Text style={EventDetailsStyles.detailText}>{eventDetails.location}</Text>
+                        </View>
+                        <View style={EventDetailsStyles.row}>
+                            <Ionicons name="person-outline" size={20} color="#00A54F" />
+                            <Text style={EventDetailsStyles.detailText}>Posted by: {eventDetails.created_by || 'Unknown'}</Text>
+                        </View>
+                        <Text style={EventDetailsStyles.descriptionHeader}>Description:</Text>
+                        <Text style={EventDetailsStyles.description}>
+                            {eventDetails.description}
                         </Text>
-                    </View>
-                    <Text style={EventDetailsStyles.descriptionHeader}>Description:</Text>
-                    <Text style={EventDetailsStyles.description}>
-                        A workshop designed for nurses to enhance their skills in patient care.
-                    </Text>
 
-                    {/* Interested Button */}
-                    <View style={EventDetailsStyles.buttonContainer}>
-                        <TouchableOpacity
-                            style={EventDetailsStyles.interestedButton}
-                            onPress={handleInterestedToggle}
-                        >
-                            <Ionicons
-                                name={interested ? 'star' : 'star-outline'}
-                                size={20}
-                                color="#fff"
-                            />
-                            <Text style={EventDetailsStyles.interestedButtonText}>
-                                {interested ? 'Not Interested' : 'Interested'}
+                        {/* Interested Button */}
+                        <View style={EventDetailsStyles.buttonContainer}>
+                            <TouchableOpacity
+                                style={EventDetailsStyles.interestedButton}
+                                onPress={handleInterestedToggle}
+                            >
+                                <Ionicons
+                                    name={interested ? 'star' : 'star-outline'}
+                                    size={20}
+                                    color="#fff"
+                                />
+                                <Text style={EventDetailsStyles.interestedButtonText}>
+                                    {interested ? 'Not Interested' : 'Interested'}
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                )}
+
+                {selectedTab === 'Attendance' && (
+                    <View style={EventDetailsStyles.attendedContainer}>
+                        {!isAttended ? (
+                            <>
+                                <Text style={EventDetailsStyles.attendanceLabel}>Code:</Text>
+                                <TextInput
+                                    style={EventDetailsStyles.inputBox}
+                                    placeholder="Enter code"
+                                    value={attendanceCode}
+                                    onChangeText={setAttendanceCode}
+                                />
+                                <TouchableOpacity
+                                    style={EventDetailsStyles.submitButton}
+                                    onPress={handleAttendanceSubmit}
+                                >
+                                    <Text style={EventDetailsStyles.submitButtonText}>Submit</Text>
+                                </TouchableOpacity>
+                            </>
+                        ) : (
+                            <Text style={EventDetailsStyles.successText}>
+                                Successfully Attended
                             </Text>
+                        )}
+                    </View>
+                )}
+
+                {selectedTab === 'Reviews' && (
+                    <View style={EventDetailsStyles.reviewsContainer}>
+                        <FlatList
+                            data={reviews}
+                            keyExtractor={(item) => item.id.toString()}
+                            renderItem={({ item }) => (
+                                <View style={EventDetailsStyles.reviewItem}>
+                                    <Text style={EventDetailsStyles.reviewText}>
+                                        <Text style={{ fontWeight: 'bold' }}>{item.name}</Text> -{' '}
+                                        {'⭐'.repeat(item.rating)}
+                                    </Text>
+                                    <Text>{item.text}</Text>
+                                </View>
+                            )}
+                        />
+                        {/* Add Review Button */}
+                        <TouchableOpacity
+                            style={[
+                                EventDetailsStyles.addReviewButton,
+                                !isAttended && { backgroundColor: 'gray' }, // Disable button if not attended
+                            ]}
+                            onPress={() => {
+                                if (isAttended) {
+                                    navigation.navigate('AddReviewScreen', { eventId, eventTitle });
+                                } else {
+                                    alert('You must validate the attendance code before leaving a review.');
+                                }
+                            }}
+                            disabled={!isAttended} // Disable button if not attended
+                        >
+                            <Ionicons name="add-circle-outline" size={20} color="#fff" />
+                            <Text style={EventDetailsStyles.addReviewButtonText}>Add Review</Text>
                         </TouchableOpacity>
                     </View>
-                </View>
-            )}
+                )}
+            </View>
 
-            {selectedTab === 'Attendance' && (
-                <View style={EventDetailsStyles.attendedContainer}>
-                    {!isAttended ? (
-                        <>
-                            <Text style={EventDetailsStyles.attendanceLabel}>Code:</Text>
-                            <TextInput
-                                style={EventDetailsStyles.inputBox}
-                                placeholder="Enter code"
-                                value={attendanceCode}
-                                onChangeText={setAttendanceCode}
-                            />
-                            <TouchableOpacity
-                                style={EventDetailsStyles.submitButton}
-                                onPress={handleAttendanceSubmit}
-                            >
-                                <Text style={EventDetailsStyles.submitButtonText}>Submit</Text>
-                            </TouchableOpacity>
-                        </>
-                    ) : (
-                        <Text style={EventDetailsStyles.successText}>
-                            Successfully Attended
-                        </Text>
-                    )}
-                </View>
-            )}
-
-            {selectedTab === 'Reviews' && (
-                <View style={EventDetailsStyles.reviewsContainer}>
-                    <FlatList
-                        data={reviews}
-                        keyExtractor={(item) => item.id.toString()}
-                        renderItem={({ item }) => (
-                            <View style={EventDetailsStyles.reviewItem}>
-                                <Text style={EventDetailsStyles.reviewText}>
-                                    <Text style={{ fontWeight: 'bold' }}>{item.name}</Text> -{' '}
-                                    {'⭐'.repeat(item.rating)}
-                                </Text>
-                                <Text>{item.text}</Text>
-                            </View>
-                        )}
-                    />
-                </View>
-            )}
+            {/* Share Event Button */}
+            <TouchableOpacity
+                style={EventDetailsStyles.shareButton}
+                onPress={handleShare}
+            >
+                <Ionicons name="share-social-outline" size={20} color="#fff" />
+                <Text style={EventDetailsStyles.shareButtonText}>Share Event</Text>
+            </TouchableOpacity>
         </View>
     );
 }
