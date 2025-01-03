@@ -41,7 +41,7 @@ function EventDetailsScreen({ route }) {
 
         const fetchEventDetails = async () => {
             try {
-                const response = await api.get(`/events/${eventId}`);
+                const response = await api.get(`/api/events/${eventId}`);
                 setEventDetails(response.data);
                 setLoading(false);
             } catch (error) {
@@ -206,16 +206,12 @@ function EventDetailsScreen({ route }) {
                                         <Text style={{ fontWeight: 'bold' }}>{item.name}</Text> -{' '}
                                         {'⭐'.repeat(item.rating)}
                                     </Text>
-                                    <Text>{item.text}</Text>
+                                    <Text>{item.comment}</Text>
                                 </View>
                             )}
                         />
-                        {/* Add Review Button */}
                         <TouchableOpacity
-                            style={[
-                                EventDetailsStyles.addReviewButton,
-                                !isAttended && { backgroundColor: 'gray' }, // Disable button if not attended
-                            ]}
+                            style={[EventDetailsStyles.addReviewButton, !isAttended && { backgroundColor: 'gray' }]}
                             onPress={() => {
                                 if (isAttended) {
                                     navigation.navigate('AddReviewScreen', { eventId, eventTitle });
@@ -223,13 +219,14 @@ function EventDetailsScreen({ route }) {
                                     alert('You must validate the attendance code before leaving a review.');
                                 }
                             }}
-                            disabled={!isAttended} // Disable button if not attended
+                            disabled={!isAttended}
                         >
                             <Ionicons name="add-circle-outline" size={20} color="#fff" />
                             <Text style={EventDetailsStyles.addReviewButtonText}>Add Review</Text>
                         </TouchableOpacity>
                     </View>
                 )}
+
             </View>
 
             {/* Share Event Button */}

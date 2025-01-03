@@ -37,14 +37,13 @@ const AddReviewScreen = ({ route, navigation }) => {
     };
 
     const handleSubmitReview = async () => {
-        if (name.trim() && reviewText.trim() && rating > 0) {
+        if (reviewText.trim() && rating > 0) {
             try {
                 // Prepare photo data (if needed)
                 const photoUris = photos.map(photo => photo.uri);
 
                 // Submit review to the backend
-                await api.post(`/api/reviews/${eventId}/reviews`, {
-                    name,
+                await api.post(`/reviews/${eventId}/reviews`, {
                     rating,
                     comment: reviewText,
                     photos: photoUris, // Include photos
@@ -59,9 +58,10 @@ const AddReviewScreen = ({ route, navigation }) => {
                 Alert.alert('Error', error.response?.data?.error || 'Failed to submit review.');
             }
         } else {
-            Alert.alert('Error', 'Please provide a name, rating, and review!');
+            Alert.alert('Error', 'Please provide a rating and review!');
         }
     };
+
 
     return (
         <View style={AddReviewStyles.container}>
@@ -69,13 +69,7 @@ const AddReviewScreen = ({ route, navigation }) => {
                 {eventTitle ? eventTitle : 'No event title provided'}
             </Text>
 
-            {/* Name Input */}
-            <TextInput
-                style={AddReviewStyles.input}
-                placeholder="Enter review name"
-                value={name}
-                onChangeText={setName}
-            />
+
 
             {/* Star Rating */}
             <View style={AddReviewStyles.starsContainer}>
