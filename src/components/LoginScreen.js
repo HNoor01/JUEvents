@@ -27,7 +27,7 @@ function LoginScreen({ navigation }) {
           navigation.navigate('Facilities');
         }
       } catch (error) {
-        alert(error.response?.data?.message || 'Login failed.');
+        alert(error.message || 'Login failed.');
       }
     } else {
       alert('Please enter both username and password.');

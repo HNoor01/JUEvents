@@ -10,43 +10,8 @@ import {
 
 import NotificationsStyles from '../styles/NotificationsStyles';
 
-// Dummy Notifications Data
-const notifications = [
-    {
-        id: '1',
-        type: 'response',
-        eventTitle: 'Nursing Skills Workshop',
-        message: 'Your request has been responded to',
-        status: 'approved',
-        comment: 'Event request has been approved!',
-    },
-    {
-        id: '2',
-        type: 'received',
-        eventTitle: 'Business Innovation Seminar',
-        message: 'Your request has been received',
-        status: null,
-        comment: '',
-    },
-    {
-        id: '3',
-        type: 'event_today',
-        eventTitle: 'Nursing Skills Workshop',
-        message: 'You have an event today',
-        status: null,
-        comment: '',
-    },
-    {
-        id: '4',
-        type: 'event_in_your_college',
-        eventTitle: 'Tech Conference 2024',
-        message: 'There is an event in your college today!',
-        status: null,
-        comment: '',
-    },
-];
-
 function NotificationsScreen() {
+    const [notifications, setNotifications] = useState([]);
     const [selectedNotification, setSelectedNotification] = useState(null);
 
     const handleNotificationPress = (notification) => {
@@ -56,6 +21,20 @@ function NotificationsScreen() {
             console.log('Navigating to event details for:', notification.eventTitle);
         }
     };
+
+    useEffect(() => {
+        const fetchEvents = async () => {
+            try {
+                const response = await api.get('/notifications/');
+                setEvents(response.data);
+            } catch (error) {
+                console.error('Error fetching events:', error);
+            }
+        };
+
+        fetchEvents(); // Call the async function inside useEffect
+    }, []);
+
 
     return (
         <SafeAreaView style={NotificationsStyles.container}>

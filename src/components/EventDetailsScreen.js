@@ -32,8 +32,9 @@ function EventDetailsScreen({ route }) {
     useEffect(() => {
         const fetchReviews = async () => {
             try {
-                const response = await api.get(`/api/reviews/${eventId}/reviews`);
-                setReviews(response.data); // Ensure response.data contains the reviews array
+                const response = await api.get(`/reviews/${eventId}/reviews`);
+                console.log("Reviews:", response.data);
+                setReviews(response.data);
             } catch (error) {
                 console.error('Error fetching reviews:', error.response?.data || error);
             }
@@ -41,7 +42,7 @@ function EventDetailsScreen({ route }) {
 
         const fetchEventDetails = async () => {
             try {
-                const response = await api.get(`/api/events/${eventId}`);
+                const response = await api.get(`/events/${eventId}`);
                 setEventDetails(response.data);
                 setLoading(false);
             } catch (error) {
@@ -203,10 +204,14 @@ function EventDetailsScreen({ route }) {
                             renderItem={({ item }) => (
                                 <View style={EventDetailsStyles.reviewItem}>
                                     <Text style={EventDetailsStyles.reviewText}>
-                                        <Text style={{ fontWeight: 'bold' }}>{item.name}</Text> -{' '}
+                                        <Text style={{ fontWeight: 'bold' }}>{item.Student.name}</Text> -{' '}
                                         {'⭐'.repeat(item.rating)}
                                     </Text>
                                     <Text>{item.comment}</Text>
+                                    <Image
+                                        source={{ uri: item.photos}}
+                                        style={EventDetailsStyles.image}
+                                    />
                                 </View>
                             )}
                         />
