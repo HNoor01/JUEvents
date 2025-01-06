@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View, Image, TouchableOpacity, ScrollView, FlatList } from 'react-native';
+import { Text, View, Image, TouchableOpacity, SafeAreaView, FlatList } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import HomeStyles from '../styles/HomeStyles';
@@ -16,13 +16,15 @@ function HomeScreen() {
             try {
                 const response = await api.get('/events/');
                 setEvents(response.data);
+                console.log("Events fetched:", response.data); // Debugging log
             } catch (error) {
                 console.error('Error fetching events:', error);
             }
         };
 
-        fetchEvents(); // Call the async function inside useEffect
+        fetchEvents();
     }, []);
+
     useFocusEffect(
         React.useCallback(() => {
             const fetchEvents = async () => {
@@ -36,48 +38,61 @@ function HomeScreen() {
             fetchEvents();
         }, [])
     );
+
     return (
-        <ScrollView contentContainerStyle={HomeStyles.container}>
+        <SafeAreaView style={HomeStyles.container}>
             {/* Header */}
             <View style={HomeStyles.header}>
-                <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={{ zIndex: 1 }}>
-                    <Icon name="user-circle-o" size={35} style={HomeStyles.UserIcon} color="#FFFFFF" />
+                <TouchableOpacity
+                    onPress={() => navigation.navigate('Profile')}
+                    style={{ zIndex: 1 }}
+                >
+                    <Icon
+                        name="user-circle-o"
+                        size={35}
+                        style={HomeStyles.UserIcon}
+                        color="#FFFFFF"
+                    />
                 </TouchableOpacity>
                 <Text style={HomeStyles.AppName}>JUEvents</Text>
             </View>
 
             {/* Events Section */}
-            <View style={HomeStyles.eventCategory}>
-                <Text style={HomeStyles.CategoryTitle}>Upcoming Events</Text>
-                {events.length > 0 ? (
-                    <FlatList
-                        data={events}
-                        keyExtractor={(item) => item.id.toString()} // Assuming event has a unique id
-                        renderItem={({ item }) => (
-                            <TouchableOpacity
-                                style={HomeStyles.eventItem}
-                                onPress={() => navigation.navigate('EventDetails', { eventId: item.id })}
-                            >
-                                <Image
-                                    source={{ uri: item.image || 'https://via.placeholder.com/150' }}
-                                    style={HomeStyles.eventImage}
-                                />
-                                <Text style={HomeStyles.eventDate}>{item.date}</Text>
-                                <Text style={HomeStyles.eventTitle}>{item.name}</Text>
-                                <Text style={HomeStyles.eventFacility}>{item.location}</Text>
-                            </TouchableOpacity>
-                        )}
-                    />
-                ) : (
-                    <Text style={{ textAlign: 'center', marginTop: 20 }}>No events available</Text>
-                )}
-            </View>
+            <FlatList
+                data={events}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={({ item }) => {
+                    console.log("Event data:", item); // Debugging log
+                    return (
+                        <TouchableOpacity
+                            style={HomeStyles.eventItem}
+                            onPress={() =>
+                                navigation.navigate('EventDetails', { eventId: item.id })
+                            }
+                        >
+                            <Image
+                                source={{ uri: item.image || 'https://via.placeholder.com/150' }}
+                                style={HomeStyles.eventImage}
+                            />
+                            <Text style={HomeStyles.eventDate}>{item.date}</Text>
+                            <Text style={HomeStyles.eventTitle}>{item.name}</Text>
+                            <Text style={HomeStyles.eventFacility}>{item.location}</Text>
+                        </TouchableOpacity>
+                    );
+                }}
+                ListEmptyComponent={
+                    <Text style={{ textAlign: 'center', marginTop: 20 }}>
+                        No events available
+                    </Text>
+                }
+                contentContainerStyle={{ paddingBottom: 100 }}
+            />
 
             {/* Bottom Navigation Icons */}
             <View style={HomeStyles.BottomIconContainer}>
                 <TouchableOpacity
                     style={HomeStyles.IconButton}
-                    onPress={() => navigation.navigate('EventDetails')}
+                    onPress={() => navigation.navigate('Home')}
                 >
                     <Icon name="home" size={50} color="#00A54F" />
                 </TouchableOpacity>
@@ -120,7 +135,7 @@ function HomeScreen() {
                     </View>
                 </TouchableOpacity>
             </View>
-        </ScrollView>
+        </SafeAreaView>
     );
 }
 

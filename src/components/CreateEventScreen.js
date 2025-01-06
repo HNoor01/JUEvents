@@ -30,28 +30,38 @@ function CreateEventScreen({ navigation }) {
     };
 
     const handleImageUpload = async () => {
-        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== 'granted') {
-            Alert.alert('Permission denied', 'You need to grant permission to access the media library.');
-            return;
-        }
+        console.log('handleImageUpload function triggered'); // Log function start
 
-        const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images, // Correct option
-            allowsEditing: true,
-            aspect: [4, 3], // Recommended aspect
-            quality: 1,
-        });
+        try {
+            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            console.log('Permission status:', status); // Log permission status
 
-        if (!result.canceled) {
-            setEventImage(result.assets[0].uri);
-            // Dynamically set aspect ratio if provided
-            if (result.assets[0].width && result.assets[0].height) {
-                const aspectRatio = result.assets[0].width / result.assets[0].height;
-                setImageAspectRatio(aspectRatio); // You'll need a state `imageAspectRatio`
+            if (status !== 'granted') {
+                Alert.alert('Permission Denied', 'You need to grant permission to access the media library.');
+                console.log('Permission not granted');
+                return;
             }
+
+            console.log('Launching ImagePicker...');
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ['images'], // Correct enum value
+                allowsEditing: true,    // Allow editing (cropping, etc.)
+                quality: 1,             // Set quality to highest
+            });
+
+            console.log('ImagePicker result:', result); // Log the result from ImagePicker
+
+            if (!result.canceled) {
+                console.log('Image selected:', result.assets[0].uri); // Log selected image URI
+                setEventImage(result.assets[0].uri); // Save image URI to state
+            } else {
+                console.log('Image selection canceled'); // Log cancellation
+            }
+        } catch (error) {
+            console.error('Error in handleImageUpload:', error); // Log errors
         }
     };
+
 
     const fetchEventDetails = async (eventId) => {
         try {
@@ -63,8 +73,6 @@ function CreateEventScreen({ navigation }) {
         }
     };
 
-// Test this function
-    fetchEventDetails(1).then(r => {}); // Replace 1 with a valid event_Id
 
     const handleCreateEvent = async () => {
         if (!validateFields()) return;
@@ -77,11 +85,13 @@ function CreateEventScreen({ navigation }) {
             formData.append('location', location);
             formData.append('description', description);
             if (eventImage) {
+                console.log('Attaching event image:', eventImage); // Log event image before attaching
                 const filename = eventImage.split('/').pop();
                 const mimeType = filename.match(/\.\w+$/) ? `image/${filename.split('.').pop()}` : 'image/jpeg';
                 formData.append('image', { uri: eventImage, name: filename, type: mimeType });
             }
 
+            console.log('Submitting form data:', formData); // Log form data
             await api.post('/events', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
@@ -92,6 +102,7 @@ function CreateEventScreen({ navigation }) {
             alert('Failed to create event. Please try again.');
         }
     };
+
 
 
     const handleDateChange = (event, selectedDate) => {
@@ -207,10 +218,14 @@ function CreateEventScreen({ navigation }) {
             )}
             <TouchableOpacity
                 style={CreateEventStyles.primaryButton}
-                onPress={handleImageUpload}
+                onPress={async () => {
+                    console.log('Pick an Image button pressed'); // Debug log
+                    await handleImageUpload(); // Await the promise
+                }}
             >
                 <Text style={CreateEventStyles.primaryButtonText}>Pick an Image</Text>
             </TouchableOpacity>
+
 
             <TouchableOpacity
                 style={CreateEventStyles.primaryButton}

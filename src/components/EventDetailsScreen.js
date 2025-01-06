@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import {Text, View, Image, TouchableOpacity, TextInput, FlatList, ActivityIndicator, Share} from 'react-native';
+import { Text, View, Image, TouchableOpacity, TextInput, FlatList, ActivityIndicator, Share } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useContext } from 'react';
 import EventDetailsStyles from '../styles/EventDetailsStyles';
 import api from '../apiService'; // Ensure your API service is properly imported
 import { FavoritesContext } from '../contexts/FavoritesContext';
-
 
 function EventDetailsScreen({ route }) {
     const { eventId, eventTitle } = route.params; // Get eventId and eventTitle from route params
@@ -17,44 +16,54 @@ function EventDetailsScreen({ route }) {
     const [isAttended, setIsAttended] = useState(false);
     const [interested, setInterested] = useState(false);
     const { toggleInterestedEvent } = useContext(FavoritesContext); // Access context
+    const [reviews, setReviews] = useState([]); // State for reviews
+
+    const navigation = useNavigation();
 
     const handleInterestedToggle = () => {
         toggleInterestedEvent(eventDetails); // Pass the event details to the context
         setInterested(!interested); // Update the local state for UI toggle
     };
 
-    const [reviews, setReviews] = useState([]);
+    // Fetch event details
+    useEffect(() => {
+        if (!eventId) {
+            console.warn('No eventId provided to fetch event details.');
+            setLoading(false);
+            return; // Exit early if no eventId is provided
+        }
 
+        const fetchData = async () => {
+            try {
+                console.log(`Fetching event details for ID: ${eventId}`);
+                const response = await api.get(`/events/${eventId}`);
+                setEventDetails(response.data);
+                console.log('Event details fetched:', response.data);
+            } catch (error) {
+                console.error('Error fetching event details:', error.response?.data || error);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    const navigation = useNavigation();
+        fetchData();
+    }, [eventId]);
 
-    // Function to fetch reviews in EventDetailsScreen.js
+    // Fetch reviews for the selected tab
     useEffect(() => {
         const fetchReviews = async () => {
             try {
                 const response = await api.get(`/reviews/${eventId}/reviews`);
-                console.log("Reviews:", response.data);
                 setReviews(response.data);
             } catch (error) {
                 console.error('Error fetching reviews:', error.response?.data || error);
             }
         };
 
-        const fetchEventDetails = async () => {
-            try {
-                const response = await api.get(`/events/${eventId}`);
-                setEventDetails(response.data);
-                setLoading(false);
-            } catch (error) {
-                console.error('Error fetching event details:', error);
-                setLoading(false);
-            }
-        };
-
-        fetchEventDetails();
-        fetchReviews();
-    }, [eventId]);
-
+        if (selectedTab === 'Reviews') {
+            fetchReviews();
+        }
+    }, [selectedTab, eventId]);
 
     const handleAttendanceSubmit = async () => {
         try {
@@ -68,9 +77,6 @@ function EventDetailsScreen({ route }) {
             alert(error.response?.data?.error || 'Invalid attendance code. Please try again.');
         }
     };
-
-
-
 
     if (loading) {
         return (
@@ -88,6 +94,7 @@ function EventDetailsScreen({ route }) {
             </View>
         );
     }
+
     const handleShare = async () => {
         try {
             const result = await Share.share({
@@ -111,6 +118,7 @@ function EventDetailsScreen({ route }) {
                 source={{ uri: eventDetails.image || 'https://via.placeholder.com/400x200' }}
                 style={EventDetailsStyles.image}
             />
+
             <Text style={EventDetailsStyles.header}>{eventDetails.name}</Text>
 
             {/* Tabs */}
@@ -198,23 +206,29 @@ function EventDetailsScreen({ route }) {
 
                 {selectedTab === 'Reviews' && (
                     <View style={EventDetailsStyles.reviewsContainer}>
-                        <FlatList
-                            data={reviews}
-                            keyExtractor={(item) => item.id.toString()}
-                            renderItem={({ item }) => (
-                                <View style={EventDetailsStyles.reviewItem}>
-                                    <Text style={EventDetailsStyles.reviewText}>
-                                        <Text style={{ fontWeight: 'bold' }}>{item.Student.name}</Text> -{' '}
-                                        {'⭐'.repeat(item.rating)}
-                                    </Text>
-                                    <Text>{item.comment}</Text>
-                                    <Image
-                                        source={{ uri: item.photos}}
-                                        style={EventDetailsStyles.image}
-                                    />
-                                </View>
-                            )}
-                        />
+                        {reviews.length === 0 ? (
+                            <Text>No reviews yet. Be the first to leave one!</Text>
+                        ) : (
+                            <FlatList
+                                data={reviews}
+                                keyExtractor={(item) => item.id.toString()}
+                                renderItem={({ item }) => (
+                                    <View style={EventDetailsStyles.reviewItem}>
+                                        <Text style={EventDetailsStyles.reviewText}>
+                                            <Text style={{ fontWeight: 'bold' }}>{item.Student.name}</Text> -{' '}
+                                            {'⭐'.repeat(item.rating)}
+                                        </Text>
+                                        <Text>{item.comment}</Text>
+                                        {item.photos && (
+                                            <Image
+                                                source={{ uri: item.photos }}
+                                                style={EventDetailsStyles.image}
+                                            />
+                                        )}
+                                    </View>
+                                )}
+                            />
+                        )}
                         <TouchableOpacity
                             style={[EventDetailsStyles.addReviewButton, !isAttended && { backgroundColor: 'gray' }]}
                             onPress={() => {
@@ -231,7 +245,6 @@ function EventDetailsScreen({ route }) {
                         </TouchableOpacity>
                     </View>
                 )}
-
             </View>
 
             {/* Share Event Button */}

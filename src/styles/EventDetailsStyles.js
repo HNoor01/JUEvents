@@ -8,9 +8,9 @@ const EventDetailsStyles = StyleSheet.create({
     },
     image: {
         width: '100%',
-        height: 200,
+        aspectRatio: 16 / 9, // Adjust this ratio based on your image dimensions
         resizeMode: 'cover',
-        borderRadius: 10, // Added from App.js
+        borderRadius: 10,
     },
     header: {
         fontSize: 32, // Updated from App.js
@@ -98,6 +98,13 @@ const EventDetailsStyles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: '#eee',
         paddingVertical: 10,
+    },
+    tabContent: {
+        flex: 1, // Take the remaining available space
+        backgroundColor: '#F8F8F8', // Light background color
+        padding: 15, // Add padding for spacing
+        borderRadius: 10, // Optional: Rounded corners
+        marginTop: 10, // Space above the tab content
     },
     reviewText: {
         fontSize: 14,
