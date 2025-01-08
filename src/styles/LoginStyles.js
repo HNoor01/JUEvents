@@ -4,14 +4,13 @@ const LoginStyles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#00A54F',
-        justifyContent: 'flex-start',
-        alignItems: 'center',
+        justifyContent: 'center', // Center all content vertically
+        alignItems: 'center', // Center all content horizontally
     },
     header: {
         justifyContent: 'center',
         alignItems: 'center',
-        marginTop: -80,
-        marginBottom: 20,
+        marginVertical: 20, // Positive margin to space it properly
     },
     HeaderImage: {
         width: 120,
@@ -19,7 +18,7 @@ const LoginStyles = StyleSheet.create({
     },
     headerText: {
         color: "#FFFFFF",
-        textAlign: 'center',
+        textAlign: 'left',
         fontSize: 30,
     },
     boldText: {
@@ -29,13 +28,13 @@ const LoginStyles = StyleSheet.create({
     },
     LoginForm: {
         width: '90%',
-        alignItems: 'flex-start',
-        marginTop: 20,
+        alignItems: 'left', // Center form elements horizontally
+        marginTop: 40, // Add space below the header
     },
     formText: {
         fontSize: 20,
         color: "#FFFFFF",
-        marginVertical: 1,
+        marginVertical: 5,
     },
     input: {
         height: 40,
@@ -45,6 +44,7 @@ const LoginStyles = StyleSheet.create({
         marginVertical: 10,
         paddingLeft: 10,
         backgroundColor: '#FFFFFF',
+        borderRadius: 5, // Add rounded corners
     },
     button: {
         backgroundColor: '#FFFFFF',
@@ -52,6 +52,7 @@ const LoginStyles = StyleSheet.create({
         marginTop: 20,
         width: '100%',
         alignItems: 'center',
+        borderRadius: 5, // Add rounded corners
     },
     buttonText: {
         color: '#00A54F',
@@ -61,7 +62,7 @@ const LoginStyles = StyleSheet.create({
         color: '#FFFFFF',
         marginTop: 10,
         textAlign: 'center',
-        marginBottom: 200,
     },
 });
+
 export default LoginStyles;

@@ -9,6 +9,8 @@ import { FavoritesContext } from '../contexts/FavoritesContext';
 
 function EventDetailsScreen({ route }) {
     const { eventId, eventTitle } = route.params; // Get eventId and eventTitle from route params
+    console.log('Received eventId:', eventId);
+
     const [eventDetails, setEventDetails] = useState(null); // State for event details
     const [loading, setLoading] = useState(true); // State for loading indicator
     const [selectedTab, setSelectedTab] = useState('Details'); // Tab state
@@ -28,9 +30,9 @@ function EventDetailsScreen({ route }) {
     // Fetch event details
     useEffect(() => {
         if (!eventId) {
-            console.warn('No eventId provided to fetch event details.');
+            console.error('No eventId provided to fetch event details.');
             setLoading(false);
-            return; // Exit early if no eventId is provided
+            return;
         }
 
         const fetchData = async () => {
@@ -41,6 +43,7 @@ function EventDetailsScreen({ route }) {
                 console.log('Event details fetched:', response.data);
             } catch (error) {
                 console.error('Error fetching event details:', error.response?.data || error);
+                setError('Failed to fetch event details.');
             } finally {
                 setLoading(false);
             }
@@ -48,6 +51,7 @@ function EventDetailsScreen({ route }) {
 
         fetchData();
     }, [eventId]);
+
 
     // Fetch reviews for the selected tab
     useEffect(() => {

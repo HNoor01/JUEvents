@@ -41,7 +41,9 @@ const HomeStyles = StyleSheet.create({
         padding: 10,
         width: '90%',
         marginHorizontal: '5%',
+        flex: 1,
     },
+
     eventImage: {
         width: '100%',
         aspectRatio: 16 / 9, // Adjust this ratio based on your image dimensions

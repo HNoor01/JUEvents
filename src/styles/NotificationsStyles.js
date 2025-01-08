@@ -1,70 +1,104 @@
 import { StyleSheet } from 'react-native';
 
-
 const NotificationsStyles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#FFF',
-        padding: 20,
+        backgroundColor: '#F7F9FC', // Light background for the entire screen
     },
     headerText: {
         fontSize: 24,
         fontWeight: 'bold',
-        color: '#00A54F',
-        marginBottom: 20,
+        textAlign: 'center',
+        marginVertical: 20,
+        color: '#00A54F', // Match the theme color
+    },
+    errorText: {
+        color: '#FF0000',
+        textAlign: 'center',
+        marginVertical: 10,
     },
     scrollContainer: {
-        paddingBottom: 100,
+        paddingHorizontal: 15,
+        paddingBottom: 20,
     },
     notificationItem: {
-        backgroundColor: '#F0F0F0',
+        backgroundColor: '#FFFFFF',
         borderRadius: 10,
         padding: 15,
         marginBottom: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 5,
+        elevation: 2, // For Android shadow
+    },
+    unreadNotification: {
+        backgroundColor: '#E6FAE6', // Light green for unread notifications
+        borderLeftWidth: 5,
+        borderLeftColor: '#00A54F',
     },
     notificationTitle: {
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: 'bold',
-        color: '#333',
+        marginBottom: 5,
+        color: '#333333',
     },
     notificationMessage: {
-        fontSize: 16,
-        color: '#555',
+        fontSize: 14,
+        color: '#555555',
+        marginBottom: 10,
+    },
+    notificationDate: {
+        fontSize: 12,
+        color: '#888888',
+        textAlign: 'right',
     },
     modalView: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
+    },
+    modalContainer: {
+        backgroundColor: '#FFFFFF',
+        borderRadius: 10,
         padding: 20,
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
+        width: '90%',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 5,
+        elevation: 5,
     },
     modalTitle: {
-        fontSize: 20,
+        fontSize: 18,
         fontWeight: 'bold',
-        color: '#FFF',
+        color: '#00A54F',
+        marginBottom: 10,
     },
     modalMessage: {
-        fontSize: 16,
-        color: '#FFF',
-        marginTop: 10,
+        fontSize: 14,
+        color: '#555555',
+        marginBottom: 10,
     },
     modalComment: {
         fontSize: 14,
-        color: '#FFF',
-        marginTop: 5,
+        fontStyle: 'italic',
+        color: '#777777',
+        marginBottom: 15,
     },
     closeButton: {
         backgroundColor: '#00A54F',
-        padding: 10,
-        marginTop: 20,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
         borderRadius: 5,
+        alignSelf: 'center',
     },
     closeButtonText: {
-        color: '#FFF',
-        textAlign: 'center',
+        color: '#FFFFFF',
+        fontSize: 16,
+        fontWeight: 'bold',
     },
 });
+
 export default NotificationsStyles;

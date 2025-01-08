@@ -1,50 +1,55 @@
 import React, { useState, useContext } from 'react';
-import { Text, View, Image, TouchableOpacity, ScrollView, TextInput } from 'react-native';
+import { Text, View, TextInput, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
 import LoginStyles from '../styles/LoginStyles';
 import api from '../apiService';
-import { UserContext } from '../contexts/UserContext'; // Import UserContext
+import { UserContext } from '../contexts/UserContext';
 
 function LoginScreen({ navigation }) {
-  const [username, setUsername] = useState('');
+  const [studentIdInput, setStudentIdInput] = useState(''); // Rename input to reflect student ID
   const [password, setPassword] = useState('');
-  const { setStudentId } = useContext(UserContext); // Use the context to set studentId
+  const {setStudentId} = useContext(UserContext);
 
   const handleLogin = async () => {
-    if (username && password) {
+    if (studentIdInput && password) {
       try {
         const response = await api.post('/students/login', {
-          student_id: username,
+          student_id: studentIdInput, // Use student_id in the API request
           password,
         });
+
+        console.log('Login API Response:', response.data); // Debug log
+
         if (response.data) {
+          setStudentId(studentIdInput); // Set student ID in context
+          console.log('Student ID set in context:', studentIdInput); // Debug log
           alert('Login successful!');
-          setStudentId(username); // Set studentId in context
-          navigation.navigate('Facilities'); // Navigate to the Facilities screen
+          navigation.navigate('Facilities'); // Navigate to the next screen
         }
       } catch (error) {
+        console.error('Login Error:', error);
         alert(error.response?.data?.message || 'Login failed.');
       }
     } else {
-      alert('Please enter both username and password.');
+      alert('Please enter both student ID and password.');
     }
   };
 
   return (
-      <ScrollView contentContainerStyle={LoginStyles.scrollContainer}>
-        <View style={LoginStyles.container}>
+      <SafeAreaView style={LoginStyles.container}>
+        <ScrollView contentContainerStyle={{flexGrow: 1}}>
           <View style={LoginStyles.header}>
-            <Image style={LoginStyles.HeaderImage} />
             <Text style={[LoginStyles.headerText, LoginStyles.boldText]}>Welcome!</Text>
             <Text style={LoginStyles.headerText}>Glad to See You!</Text>
           </View>
 
           <View style={LoginStyles.LoginForm}>
-            <Text style={LoginStyles.formText}>Username:</Text>
+            <Text style={LoginStyles.formText}>Student ID:</Text>
             <TextInput
                 style={LoginStyles.input}
-                placeholder="Enter Username"
-                onChangeText={setUsername}
-                value={username}
+                placeholder="Enter Student ID"
+                onChangeText={setStudentIdInput}
+                value={studentIdInput}
+                keyboardType="numeric"
             />
             <Text style={LoginStyles.formText}>Password:</Text>
             <TextInput
@@ -62,9 +67,9 @@ function LoginScreen({ navigation }) {
               <Text style={LoginStyles.ForgotPassword}>Forgot your password?</Text>
             </TouchableOpacity>
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </SafeAreaView>
   );
 }
 
-export default LoginScreen;
+  export default LoginScreen;
