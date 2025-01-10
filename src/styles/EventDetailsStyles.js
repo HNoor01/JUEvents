@@ -40,13 +40,13 @@ const EventDetailsStyles = StyleSheet.create({
         paddingBottom: 5,
     },
     detailsContainer: {
-        padding: 20,
+        padding: 10,
     },
     detailText: {
-        fontSize: 16,
+        fontSize: 14,
         marginVertical: 5,
         color: '#333',
-        marginLeft: 10, // Added from App.js
+        marginLeft: 3, // Added from App.js
     },
     description: {
         fontSize: 14,
@@ -164,6 +164,47 @@ const EventDetailsStyles = StyleSheet.create({
         fontWeight: 'bold',
         marginLeft: 5,
     },
+    statusLabel: {
+        fontSize: 16,
+        color: '#00A54F', // App's green color for the word "Status"
+        fontWeight: 'bold',
+        marginBottom: 10,
+    },
+
+    statusValue: {
+        fontWeight: 'bold',
+    },
+
+    approved: {
+        color: '#00A54F', // App's green for the Approved status
+    },
+
+    rejected: {
+        color: 'red', // Default red for Rejected
+    },
+
+    pending: {
+        color: 'orange', // Default orange for Pending
+    },
+
+    detailsContainer: {
+        padding: 10,
+    },
+
+    detailsText: {
+        fontSize: 16,
+        color: '#555',
+        marginTop: 10,
+    },
+
+    placeholderText: {
+        fontSize: 16,
+        color: '#999',
+        textAlign: 'center',
+        marginTop: 20,
+    },
+
+
 });
 
 export default EventDetailsStyles;

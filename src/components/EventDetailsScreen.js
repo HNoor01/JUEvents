@@ -146,39 +146,48 @@ function EventDetailsScreen({ route }) {
             <View style={EventDetailsStyles.tabContent}>
                 {selectedTab === 'Details' && (
                     <View style={EventDetailsStyles.detailsContainer}>
+                        {/* Event Date */}
                         <View style={EventDetailsStyles.row}>
                             <Ionicons name="calendar-outline" size={20} color="#00A54F" />
                             <Text style={EventDetailsStyles.detailText}>{eventDetails.date}</Text>
                         </View>
+
+                        {/* Event Location */}
                         <View style={EventDetailsStyles.row}>
                             <Ionicons name="location-outline" size={20} color="#00A54F" />
                             <Text style={EventDetailsStyles.detailText}>{eventDetails.location}</Text>
                         </View>
+
+                        {/* Event Creator */}
                         <View style={EventDetailsStyles.row}>
                             <Ionicons name="person-outline" size={20} color="#00A54F" />
-                            <Text style={EventDetailsStyles.detailText}>Posted by: {eventDetails.created_by || 'Unknown'}</Text>
+                            <Text style={EventDetailsStyles.detailText}>
+                                Posted by: {eventDetails.created_by || 'Unknown'}
+                            </Text>
                         </View>
-                        <Text style={EventDetailsStyles.descriptionHeader}>Description:</Text>
-                        <Text style={EventDetailsStyles.description}>
-                            {eventDetails.description}
+
+                        {/* Event Status */}
+                        <Text style={EventDetailsStyles.statusLabel}>
+                            Status: <Text
+                                style={[
+                                    EventDetailsStyles.statusValue,
+                                    eventDetails.status === 'Approved'
+                                        ? EventDetailsStyles.approved
+                                        : eventDetails.status === 'Rejected'
+                                            ? EventDetailsStyles.rejected
+                                            : EventDetailsStyles.pending,
+                                ]}
+                            >
+                                {eventDetails.status || 'Pending'}
+                            </Text>
                         </Text>
 
-                        {/* Interested Button */}
-                        <View style={EventDetailsStyles.buttonContainer}>
-                            <TouchableOpacity
-                                style={EventDetailsStyles.interestedButton}
-                                onPress={handleInterestedToggle}
-                            >
-                                <Ionicons
-                                    name={interested ? 'star' : 'star-outline'}
-                                    size={20}
-                                    color="#fff"
-                                />
-                                <Text style={EventDetailsStyles.interestedButtonText}>
-                                    {interested ? 'Not Interested' : 'Interested'}
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
+                        {/* Event Description */}
+                        <Text style={EventDetailsStyles.descriptionHeader}>Description:</Text>
+                        <Text style={EventDetailsStyles.description}>
+                            {eventDetails.description || 'No additional details available.'}
+                        </Text>
+
                     </View>
                 )}
 
@@ -234,7 +243,10 @@ function EventDetailsScreen({ route }) {
                             />
                         )}
                         <TouchableOpacity
-                            style={[EventDetailsStyles.addReviewButton, !isAttended && { backgroundColor: 'gray' }]}
+                            style={[
+                                EventDetailsStyles.addReviewButton,
+                                !isAttended && { backgroundColor: 'gray' },
+                            ]}
                             onPress={() => {
                                 if (isAttended) {
                                     navigation.navigate('AddReviewScreen', { eventId, eventTitle });
@@ -262,5 +274,4 @@ function EventDetailsScreen({ route }) {
         </View>
     );
 }
-
 export default EventDetailsScreen;

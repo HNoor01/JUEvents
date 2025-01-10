@@ -57,13 +57,18 @@ function NotificationsScreen({ navigation }) {
                 alert('This notification is not linked to an event.');
                 return;
             }
-
             console.log('Navigating to EventDetailsScreen with eventId:', notification.eventId);
-            navigation.navigate('EventDetails', { eventId: notification.eventId }); // Pass eventId here
+            const response = await api.get(`/events/${notification.eventId}`);
+            navigation.navigate('EventDetails', {
+                eventId: notification.eventId,
+                eventTitle: response.data.name, // Pass event title if needed
+            });
         } catch (error) {
             console.error('Error handling notification press:', error);
+            alert('Failed to load event details.');
         }
     };
+
 
 
 
